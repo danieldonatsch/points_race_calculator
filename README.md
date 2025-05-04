@@ -1,6 +1,6 @@
 # Calculator For Points Race Results
 
-*DSICLAIMER* This is a hobby project and also a Cursor AI-coding test. All the code is actually written by some LLMs through the editor Cursor.
+**DSICLAIMER** This is a hobby project and also a Cursor AI-coding test. All the code is actually written by some LLMs through the editor Cursor.
 
 ## What's A Point Race?
 
