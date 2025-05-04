@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Points Race Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 0.5em; }
+    th { background: #eee; }
+    .input-row { margin-bottom: 1em; }
+    .error { color: red; }
+    #lapNumber { font-weight: bold; margin-bottom: 1em; display: block; }
+  </style>
+</head>
+<body>
+  <h1>Points Race Calculator</h1>
+  <div class="input-row">
+    <label>Enter starting numbers (comma separated):</label>
+    <input type="text" id="startNumbers" placeholder="e.g. 12, 23, 45">
+    <button onclick="initRace()">Start Race</button>
+  </div>
+  <div id="raceControls" style="display:none;">
+    <span id="lapNumber">Lap: 1</span>
+    <h2>Enter Sprint Results</h2>
+    <form id="sprintForm" onsubmit="addSprint(event)">
+      <label>1st place:</label>
+      <input type="text" id="firstPlaceInput" placeholder="e.g. 12">
+      <label>2nd place:</label>
+      <input type="text" id="secondPlaceInput" placeholder="e.g. 23">
+      <button type="submit">Add Sprint</button>
+      <span class="error" id="errorMsg"></span>
+    </form>
+  </div>
+  <h2>Points Table</h2>
+  <table id="pointsTable">
+    <thead>
+      <tr>
+        <th>Starting Number</th>
+        <th>Points</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <h2>Sprint History</h2>
+  <table id="historyTable">
+    <thead>
+      <tr>
+        <th>Lap</th>
+        <th>1st Place (2 pts)</th>
+        <th>2nd Place (1 pt)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <script>
+    let participants = {};
+    let numbers = [];
+    let lap = 1;
+    let history = [];
+
+    function initRace() {
+      const input = document.getElementById('startNumbers').value;
+      numbers = input.split(',').map(n => n.trim()).filter(n => n);
+      participants = {};
+      numbers.forEach(num => participants[num] = 0);
+      lap = 1;
+      history = [];
+      updatePointsTable();
+      updateHistoryTable();
+      document.getElementById('raceControls').style.display = 'block';
+      document.getElementById('errorMsg').textContent = '';
+      updateLapNumber();
+    }
+
+    function addSprint(event) {
+      event.preventDefault();
+      const first = document.getElementById('firstPlaceInput').value.trim();
+      const second = document.getElementById('secondPlaceInput').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.textContent = '';
+
+      if (!numbers.includes(first)) {
+        errorMsg.textContent = "1st place number not found!";
+        return;
+      }
+      if (!numbers.includes(second)) {
+        errorMsg.textContent = "2nd place number not found!";
+        return;
+      }
+      if (first === second) {
+        errorMsg.textContent = "1st and 2nd place cannot be the same!";
+        return;
+      }
+      participants[first] += 2;
+      participants[second] += 1;
+      history.push({
+        lap: lap,
+        first: first,
+        second: second
+      });
+      updatePointsTable();
+      updateHistoryTable();
+      document.getElementById('firstPlaceInput').value = '';
+      document.getElementById('secondPlaceInput').value = '';
+      lap += 1;
+      updateLapNumber();
+    }
+
+    function updateLapNumber() {
+      document.getElementById('lapNumber').textContent = "Lap: " + lap;
+    }
+    function updatePointsTable() {
+      const tbody = document.getElementById('pointsTable').querySelector('tbody');
+      tbody.innerHTML = '';
+      
+      // Create array of number/points pairs and sort by points descending
+      const sortedEntries = numbers.map(num => ({
+        number: num,
+        points: participants[num]
+      })).sort((a, b) => b.points - a.points);
+
+      // Create table rows in sorted order
+      sortedEntries.forEach(entry => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${entry.number}</td><td>${entry.points}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    function updateHistoryTable() {
+      const tbody = document.getElementById('historyTable').querySelector('tbody');
+      tbody.innerHTML = '';
+      history.forEach(entry => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${entry.lap}</td><td>${entry.first}</td><td>${entry.second}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+  </script>
+</body>
+</html>
